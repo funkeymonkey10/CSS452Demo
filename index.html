@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="module" src="./src/engine/buttons.js"></script>
+        <title>Runtime UI</title>
+
+        <!-- the following says there are javascript source code contained in 
+             the external source files
+        -->
+        <!-- external library -->
+        <button onclick="loadButton()" type="button">Load</button>
+        <button onclick="saveButton()" type="button">Save</button>
+        <button onclick="runButton()" type="button">Run</button>
+        <br><br>
+        <input type="file" id="text1" placeholder="Enter file path to load">
+        <br><br>
+        <script type="text/javascript" src="src/lib/gl-matrix.js"></script>
+
+        <!-- our game -->
+        <script type="module" src="./src/my_game/my_game.js"></script>
+    </head>
+
+    <body>
+        <canvas id="GLCanvas" width="680" height="350">
+            <!-- GLCanvas is the area we will draw in: a 640x480 area. -->
+            Your browser does not support the HTML5 canvas.
+            <!-- this message will show only if WebGL clearing failed -->
+        </canvas>
+    </body>
+</html>
