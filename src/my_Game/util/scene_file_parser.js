@@ -76,6 +76,7 @@ class SceneFileParser {
         return cam;
     }
 
+    // Pushes renderables into an array
     parseSquaresJSON(sqSet)
     {
         // An actual js object, not xml
@@ -90,6 +91,7 @@ class SceneFileParser {
             h = Number(elm[i].Height);
             r = Number(elm[i].Rotation);
             c = elm[i].Color;
+
             sq = new engine.Renderable();
             sq.setColor(c);
             sq.getXform().setPosition(x, y);
@@ -99,6 +101,7 @@ class SceneFileParser {
         }
     }
 
+    // Pushes Game Objects into an array
     parseObjectJSON(obj)
     {
         // An actual js object, not xml
@@ -113,12 +116,18 @@ class SceneFileParser {
             h = Number(elm[i].Height);
             r = Number(elm[i].Rotation);
             c = elm[i].Color;
+
             sq = new engine.Renderable();
             sq.setColor(c);
             sq.getXform().setPosition(x, y);
             sq.getXform().setRotationInDegree(r); // In Degree
             sq.getXform().setSize(w, h);
+
             var newObj = new engine.GameObject(sq);
+            if(elm[i].Components != null)
+            {
+                newObj.setComponents(elm[i].Components);
+            }
             obj.push(newObj);
         }
     }
@@ -127,7 +136,8 @@ class SceneFileParser {
     // Link: https://stackoverflow.com/questions/13405129/javascript-create-and-save-file
     saveCurrentFile()
     {
-        var file = new Blob([JSON.stringify(this.xml, null, 4)], {type : 'application/json'});
+        var file = new Blob([JSON.stringify(this.xml, null, 4)], 
+        {type : 'application/json'});
         let filename = "sceneDownload";
         if (window.navigator.msSaveOrOpenBlob)
         {
@@ -148,6 +158,7 @@ class SceneFileParser {
         }
     }
 
+    // Saves a game object from scene to level
     saveRenderable(renderable, pos)
     {
         let xForm = renderable.getXform();
@@ -159,7 +170,7 @@ class SceneFileParser {
         elm[pos].Width = xForm.getWidth();
         elm[pos].Height = xForm.getHeight();
         elm[pos].Rotation = xForm.getRotationInDegree();
-        elm[pos].Color = renderable.getColor();
+        elm[pos].Color = renderable.getRenderable().getColor();
     }
 }
 

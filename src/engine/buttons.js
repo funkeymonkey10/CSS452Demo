@@ -43,6 +43,10 @@ window.saveButton = function()
 window.runButton = function()
 {
     curLevel.isRunning = !curLevel.isRunning;
+    if(curLevel.isRunning == false)
+    {
+        curLevel.reloadScene();
+    }
 }
 
 // Sets the current level

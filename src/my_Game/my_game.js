@@ -3,7 +3,7 @@
 import engine from "../engine/index.js";
 import SceneFileParser from "./util/scene_file_parser.js";
 import button from "../engine/buttons.js";
-import { eMouseButton } from "../engine/input.js";
+import EngineEditor from "./util/engine_edtior.js";
 
 class MyGame extends engine.Scene {
     constructor() {
@@ -17,21 +17,21 @@ class MyGame extends engine.Scene {
 
         this.mSceneFile = "assets/scene.json";
 
-        this.isRunning = false;
-
         this.gameObjects = [];
+        this.myGameObject = null;
 
         this.editorSelectObject = null;
-
-        this.myGameObject = null;
+        this.engineEditor = null;
+        this.isScale = false;
+        this.isRunning = false;
+        this.parsePlace = 0;
     }
 
     load()
     {
         if(button.getFileName() != null)
         {
-            this.mSceneFile =
-            button.getData();
+            this.mSceneFile = button.getData();
         }
         else
         {
@@ -74,9 +74,11 @@ class MyGame extends engine.Scene {
 
         this.fileParse.parseObjectJSON(this.gameObjects);
         
-        //test only
+        //first selected object in array
         this.editorSelectObject = this.gameObjects[0];
-        console.log(this.editorSelectObject);
+
+        this.engineEditor = new EngineEditor(this.mCamera,  this.fileParse);
+        this.engineEditor.setEditorSelectObject(this.editorSelectObject);
     }
     
     // This is the draw function, make sure to setup proper drawing environment, and more
@@ -109,13 +111,83 @@ class MyGame extends engine.Scene {
     // anything from this function!
     update ()
     {
+        if(engine.input.isKeyClicked(engine.input.keys.Ctrl))
+        {
+            this.isScale = !this.isScale;
+        }
+
+        if(this.isRunning == true)
+        {
+            for(let i = 0; i < this.gameObjects.length; i++)
+            {
+                if(this.gameObjects[i].getComponents()[0] == "Hero")
+                {
+                    this.HeroMove(this.gameObjects[i]);
+                }
+            }
+        }
+
+        if(this.isScale == true)
+        {
+            let change = this.engineEditor.checkAxisScale();
+            if(this.isRunning == false && change)
+            {
+                this.engineEditor.saveObjParse();
+            }
+        }
+        else
+        {
+            let change = this.engineEditor.checkAxisMovement();
+            if(this.isRunning == false && change)
+            {
+                this.engineEditor.saveObjParse();
+            }
+        }
+        this.mCamera = this.engineEditor.editorCameraMovement();
         for(let i = 0; i < this.gameObjects.length; i++)
         {
-            if(engine.input.isButtonPressed(engine.input.eMouseButton.eLeft) &&
+            this.gameObjects[i].update();
+            // Changing editor object on left mouse
+            if(engine.input.isButtonClicked(engine.input.eMouseButton.eLeft) &&
             this.checkMouseBounds(this.gameObjects[i]))
             {
                 this.editorSelectObject = this.gameObjects[i];
-                this.editorSelectObject.getXform().getPosition();
+                this.engineEditor.setEditorSelectObject(this.editorSelectObject);
+                this.parsePlace = i;
+                
+                this.engineEditor.setParsePlace(this.parsePlace);
+            }
+        }
+    }
+
+    HeroMove(gameObj)
+    {
+        let xform = gameObj.getXform();
+
+        // Move hero object
+        if(engine.input.isKeyPressed(engine.input.keys.W))
+        {
+            xform.setYPos(xform.getYPos() + 0.1);
+        }
+        if(engine.input.isKeyPressed(engine.input.keys.S))
+        {
+            xform.setYPos(xform.getYPos() - 0.1);
+        }
+        if(engine.input.isKeyPressed(engine.input.keys.A))
+        {
+            xform.setXPos(xform.getXPos() - 0.1);
+        }
+        if(engine.input.isKeyPressed(engine.input.keys.D))
+        {
+            xform.setXPos(xform.getXPos() + 0.1);
+        }
+
+        for(let i = 0; i < this.gameObjects.length; i++)
+        {
+            if(i != 2 && gameObj.getBBox().intersectsBound(
+                this.gameObjects[i].getBBox()))
+            {
+                this.restartScene();
             }
         }
     }
@@ -135,6 +207,16 @@ class MyGame extends engine.Scene {
             return true;
         }
         return false;
+    }
+
+    reloadScene()
+    {
+        this.gameObjects = [];
+        this.fileParse.parseObjectJSON(this.gameObjects);
+        
+        //first selected object in array
+        this.editorSelectObject = this.gameObjects[0];
+        this.engineEditor.setEditorSelectObject(this.editorSelectObject);
     }
 
     restartScene()

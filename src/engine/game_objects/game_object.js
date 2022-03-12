@@ -18,13 +18,19 @@ class GameObject {
         //our axis stuff
         this.axes = [];
         let pos = this.getXform().getPosition();
-        let line = new LineRenderable(pos[0], pos[1], pos[0] + (this.getXform().getWidth() / 2) + this.getXform().getWidth() * 0.3, pos[1]);
+        let line = new LineRenderable(pos[0], pos[1], pos[0] + 5, pos[1]);
         line.setColor([1, 0, 0, 1]);
         this.axes.push(line);
-        line = new LineRenderable(pos[0], pos[1], pos[0], pos[1] + (this.getXform().getHeight() / 2) + this.getXform().getHeight() * 0.3);
+        line = new LineRenderable(pos[0], pos[1], pos[0], pos[1] + 5);
         line.setColor([0, 1, 0, 1]);
         this.axes.push(line);
+
+        // All user defined components
+        this.components = [];
     }
+
+    getComponents(){ return this.components;}
+    setComponents(comps){ this.components = comps;}
 
     getXform() { return this.mRenderComponent.getXform(); }
     getBBox() {
@@ -94,6 +100,8 @@ class GameObject {
     update() {
         // simple default behavior
         let pos = this.getXform().getPosition();
+        this.axes[0].setVertices(pos[0], pos[1], pos[0] + 5, pos[1]);
+        this.axes[1].setVertices(pos[0], pos[1], pos[0], pos[1] + 5);
         vec2.scaleAndAdd(pos, pos, this.getCurrentFrontDir(), this.getSpeed());
     }
 
